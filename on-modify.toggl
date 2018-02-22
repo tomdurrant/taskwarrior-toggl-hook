@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+""" This on-modify hook stores uses hamster-cli as a timetracking tool
+Seems to work with hamster 2.91.3 (standard in ubuntu 15.10)
+TW "projects" translated to Hamster "Category"
+TW "tags" translated to Hamster "tags"
+# and @ are replaced by _ to avoid parsing errors
+"""
+
+import sys
+import json
+import subprocess
+import shutil
+
+old_task = json.loads(sys.stdin.readline())
+mod_task = json.loads(sys.stdin.readline())
+
+proj = None
+tags = None
+
+desc = old_task["description"]
+if "project" in old_task:
+    proj = old_task["project"]
+if "tags" in old_task:
+    tags = old_task["tags"]
+
+# Ubuntu, Debian
+toggl_cli = shutil.which("toggl")
+if not toggl_cli:
+    # No executable found, exiting
+    print("on-modify.toggl hook : "
+          "No executable found for toggle. Download from https://github.com/drobertadams/toggl-cli")
+    sys.exit(1)
+
+
+def hamster_specialchars(input_str):
+    # Escape hamster-cli special chars, there doesn't seem to be a better way
+    return input_str.replace("#", "_").replace("@", "_")
+
+# "start" command used
+if ('start' not in old_task and 'start' in mod_task):
+    cmd_arg = '{}'.format(hamster_specialchars(desc))
+    if proj:
+        cmd_arg += '@{}'.format(hamster_specialchars(proj))
+    if tags:
+        cmd_arg += ', '
+        for t in tags:
+            cmd_arg += '#{} '.format(hamster_specialchars(t))
+    subprocess.call([toggl_cli,
+                     "start",
+                     cmd_arg])
+
+# "stop" command used
+if ('start' in old_task and 'start' not in mod_task):
+    subprocess.call([toggl_cli,
+                     "stop"])
+
+print(json.dumps(mod_task))
+sys.exit(0)
