@@ -28,26 +28,26 @@ toggl_cli = shutil.which("toggl")
 if not toggl_cli:
     # No executable found, exiting
     print("on-modify.toggl hook : "
-          "No executable found for toggle. Download from https://github.com/drobertadams/toggl-cli")
+          "No executable found for toggl. Download from https://github.com/tomdurrant/toggl-cli")
     sys.exit(1)
 
 
 def hamster_specialchars(input_str):
     # Escape hamster-cli special chars, there doesn't seem to be a better way
-    return input_str.replace("#", "_").replace("@", "_")
+    return input_str.replace("+", "_").replace("@", "_")
 
 # "start" command used
+cmd_arg = []
 if ('start' not in old_task and 'start' in mod_task):
-    cmd_arg = '{}'.format(hamster_specialchars(desc))
+    cmd_arg.append('{}'.format(hamster_specialchars(desc)))
     if proj:
-        cmd_arg += '@{}'.format(hamster_specialchars(proj))
+        cmd_arg.append('@{}'.format(hamster_specialchars(proj)))
     if tags:
-        cmd_arg += ', '
-        for t in tags:
-            cmd_arg += '#{} '.format(hamster_specialchars(t))
+        cmd_arg.append('+'+','.join(tags))
+    print(cmd_arg)
     subprocess.call([toggl_cli,
-                     "start",
-                     cmd_arg])
+                     "start"] + cmd_arg
+                     )
 
 # "stop" command used
 if ('start' in old_task and 'start' not in mod_task):
