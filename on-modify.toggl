@@ -44,7 +44,6 @@ if ('start' not in old_task and 'start' in mod_task):
         cmd_arg.append('@{}'.format(hamster_specialchars(proj)))
     if tags:
         cmd_arg.append('+'+','.join(tags))
-    print(cmd_arg)
     subprocess.call([toggl_cli,
                      "start"] + cmd_arg
                      )
