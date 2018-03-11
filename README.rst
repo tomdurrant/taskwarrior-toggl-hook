@@ -12,7 +12,7 @@ Install
 And add this it to your Taskwarrior hooks::
 
     mkdir -p ~/.task/hooks
-    ln -s on-modify.toggl ~/.task/hooks/on-modify.toggl
+    ln -s `pwd`/on-modify.toggl ~/.task/hooks/on-modify.toggl
 
 Usage 
 --------
